@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="A diary where you can record your daily life with your pet with photos">
+    <meta name="keywords" content="pet diary, diary, daily life with a pet"/>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+
+    <title>My Pet Diary</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/bs-custom-file-input/dist/bs-custom-file-input.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Short+Stack&display=swap" rel="stylesheet">
+    <link rel="shortcut icon" href="/static/favicon-16x16.png"/>
+
+    <style>
+        * {
+            font-family: 'Short Stack', cursive;
+        }
+
+        .posting-box {
+            width: 500px;
+            margin-top: 20px;
+        }
+
+        .custom-file {
+            margin-bottom: 20px;
+        }
+
+        .wrap {
+            max-width: 900px;
+            width: 100%;
+            margin: auto;
+        }
+
+        .container {
+            padding-left: 50px;
+        }
+
+    </style>
+
+    <script>
+        $(function () {
+            bsCustomFileInput.init()
+            listing()
+        })
+
+        function listing() {
+            $.ajax({
+                type: "GET",
+                url: "/diary",
+                data: {},
+                success: function (response) {
+                    let diaries = (response['all_diary'])
+
+                    for (let i = 0; i < diaries.length; i++) {
+                        let title = diaries[i]['title']
+                        let contents = diaries[i]['contents']
+                        let file = diaries[i]['file']
+                        let date = diaries[i]['date']
+
+                        let temp_html = `
+                            <div class="card">
+                            <img src="/static/${file}" class="card-img-top">
+                            <div class="card-body">
+                                <h5 class="card-title">${title}</h5>
+                                <p class="card-text">${contents}</p>
+                                <p class="card-date">${date}</p>
+                            </div>
+                        </div>
+                       `
+                        $('#cards-box').append(temp_html)
+                    }//end of for
+                }
+            })
+        }//end of listing()
+
+        function posting() {
+            let title = $('#title').val()
+            let contents = $('#contents').val()
+            let file = $('#file')[0].files[0]
+            let formData = new FormData()
+
+            formData.append('file_give', file)
+            formData.append('title_give', title)
+            formData.append('contents_give', contents)
+
+            $.ajax({
+                type: "POST",
+                url: "/diary",
+                data: formData,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    if (response["result"] == "success") {
+                        alert(response["msg"])
+                        window.location.reload()
+                    } else {
+                        alert(response["msg"])
+                    }
+                }
+            })
+        }//end of save_diary()
+
+    </script>
+</head>
+
+<body>
+<div class="wrap">
+    <div class="jumbotron jumbotron-fluid">
+        <div class="container">
+            <h1 class="display-4">My Pet Diary</h1>
+            <p class="lead">This is a space that contains the daily life of my cute hamster Cookie.</p>
+            <div class="posting-box">
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="file">
+                    <label class="custom-file-label" for="file">Choose File</label>
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="title" placeholder="Image Title">
+                </div>
+                <div class="form-group">
+                    <textarea class="form-control" id="contents" placeholder="Write your story"></textarea>
+                </div>
+                <button onclick="posting()" type="submit" class="btn btn-info">Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-columns" id="cards-box"></div>
+</div>
+
+
+</body>
+</html>
