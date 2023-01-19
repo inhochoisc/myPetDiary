@@ -69,7 +69,7 @@
                 success: function (response) {
                     let diaries = (response['all_diary'])
 
-                    for (let i = 0; i < diaries.length; i++) {
+                    for (let i in diaries) {
                         let title = diaries[i]['title']
                         let contents = diaries[i]['contents']
                         let file = diaries[i]['file']
